@@ -2,6 +2,7 @@ package com.felicite.SGAE30.services;
 
 import com.felicite.SGAE30.dtos.PaymentRequestDTO;
 import com.felicite.SGAE30.dtos.PaymentResponseDTO;
+import com.felicite.SGAE30.enums.PaymentStatus;
 import com.felicite.SGAE30.mappers.PaymentMapper;
 import com.felicite.SGAE30.models.Payment;
 import com.felicite.SGAE30.models.Registration;
@@ -15,6 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -61,4 +65,33 @@ import java.time.LocalDateTime;
 
         return paymentMapper.toDto(savedPayment, newRemaining);
     }
+
+    public List<PaymentResponseDTO> getPaymentHistory(Long registrationId) {
+        Registration reg = registrationRepo.findById(registrationId)
+                .orElseThrow(() -> new RuntimeException("registration file not found."));
+
+        List<Payment> payments = paymentRepo.findByRegistration_RegistrationIdOrderByDatePaymentDesc(registrationId);
+
+        Double totalPaid = paymentRepo.sumAmountByRegistration(registrationId);
+        if (totalPaid == null) totalPaid = 0.0;
+        Double currentRemaining = reg.getTotalPrice() - totalPaid;
+
+        return payments.stream()
+                .map(payment -> paymentMapper.toDto(payment, currentRemaining))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void cancelPayment(Long paymentId){
+        Payment payment = paymentRepo.findById(paymentId)
+                .orElseThrow(()-> new RuntimeException("payment not found!!!"));
+        payment.setPaymentStatus(PaymentStatus.CANCELLED);
+        payment.setNote(payment.getNote() + " (cancel the " + LocalDateTime.now() + ")");
+
+        paymentRepo.save(payment);
+    }
+
+
+
+
 }

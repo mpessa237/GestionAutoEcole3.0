@@ -3,6 +3,7 @@ package com.felicite.SGAE30.controllers;
 import com.felicite.SGAE30.dtos.RegistrationRequestDTO;
 import com.felicite.SGAE30.dtos.RegistrationResponseDTO;
 import com.felicite.SGAE30.dtos.StudentResponseDTO;
+import com.felicite.SGAE30.enums.DebtorResponseDTO;
 import com.felicite.SGAE30.mappers.RegistrationMapper;
 import com.felicite.SGAE30.models.Registration;
 import com.felicite.SGAE30.services.RegistrationService;
@@ -54,9 +55,6 @@ public class RegistrationController {
         registrationService.enableStudent(userId);
         return ResponseEntity.ok("the account student reactive successfully.");
     }
-
-
-
 
 
 }

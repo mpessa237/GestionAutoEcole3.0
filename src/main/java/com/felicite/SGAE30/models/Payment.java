@@ -1,6 +1,7 @@
 package com.felicite.SGAE30.models;
 
 import com.felicite.SGAE30.enums.PaymentMethod;
+import com.felicite.SGAE30.enums.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,6 +26,9 @@ public class Payment {
 
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
+
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus paymentStatus = PaymentStatus.VALID;
 
     @Column(unique = true)
     private String receiptNumber; // Ex: REC-2026-0001

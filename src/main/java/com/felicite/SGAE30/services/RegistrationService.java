@@ -2,11 +2,14 @@ package com.felicite.SGAE30.services;
 
 import com.felicite.SGAE30.dtos.RegistrationRequestDTO;
 import com.felicite.SGAE30.dtos.StudentResponseDTO;
+import com.felicite.SGAE30.enums.DebtorResponseDTO;
+import com.felicite.SGAE30.enums.PaymentStatus;
 import com.felicite.SGAE30.enums.Role;
 import com.felicite.SGAE30.enums.TypePermit;
 import com.felicite.SGAE30.mappers.RegistrationMapper;
 import com.felicite.SGAE30.models.Registration;
 import com.felicite.SGAE30.models.User;
+import com.felicite.SGAE30.repositories.PaymentRepo;
 import com.felicite.SGAE30.repositories.RegistrationRepo;
 import com.felicite.SGAE30.repositories.UserRepo;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +28,6 @@ public class RegistrationService {
 
     private final UserRepo userRepo;
     private final RegistrationRepo registrationRepo;
-    private RegistrationMapper registrationMapper;
 
 
     @Transactional
@@ -120,5 +122,6 @@ public class RegistrationService {
                 ))
                 .collect(Collectors.toList());
    }
+
 
 }
