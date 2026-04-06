@@ -16,8 +16,6 @@ public interface PaymentRepo extends JpaRepository<Payment,Long> {
 
 
 
-    // N'oublie pas l'annotation @Query !
-    // Sans elle, Spring cherche une propriété "sumAmountByRegistration" dans l'entité Payment
     @Query("SELECT SUM(p.amount) FROM Payment p WHERE p.registration.registrationId = :regId AND p.paymentStatus = :status")
     Double sumValidAmountByRegistration(@Param("regId") Long regId, @Param("status") PaymentStatus status);
 

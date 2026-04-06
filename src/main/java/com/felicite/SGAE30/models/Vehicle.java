@@ -1,6 +1,8 @@
 package com.felicite.SGAE30.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.felicite.SGAE30.enums.StatusVehicle;
+import com.felicite.SGAE30.enums.TypePermit;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,8 +26,11 @@ public class Vehicle {
     private String mark;
     @Enumerated(EnumType.STRING)
     private StatusVehicle statusVehicle;
-    private String typePermit;
+    @Enumerated(EnumType.STRING)
+    private TypePermit typePermit;
+
 
     @OneToMany(mappedBy = "vehicle")
+    @JsonIgnore
     private List<Lesson> lessonList ;
 }

@@ -2,18 +2,13 @@ package com.felicite.SGAE30.services;
 
 import com.felicite.SGAE30.dtos.RegistrationRequestDTO;
 import com.felicite.SGAE30.dtos.StudentResponseDTO;
-import com.felicite.SGAE30.enums.DebtorResponseDTO;
-import com.felicite.SGAE30.enums.PaymentStatus;
 import com.felicite.SGAE30.enums.Role;
 import com.felicite.SGAE30.enums.TypePermit;
-import com.felicite.SGAE30.mappers.RegistrationMapper;
 import com.felicite.SGAE30.models.Registration;
 import com.felicite.SGAE30.models.User;
-import com.felicite.SGAE30.repositories.PaymentRepo;
 import com.felicite.SGAE30.repositories.RegistrationRepo;
 import com.felicite.SGAE30.repositories.UserRepo;
 import lombok.RequiredArgsConstructor;
-import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,9 +71,6 @@ public class RegistrationService {
                 ))
                 .collect(Collectors.toList());
     }
-
-
-
     @Transactional
     public void disableStudent(Long userId) {
         User student = userRepo.findById(userId)
@@ -88,6 +80,8 @@ public class RegistrationService {
         userRepo.save(student);
     }
 
+
+
     @Transactional
     public void enableStudent(Long userId) {
         User student = userRepo.findById(userId)
@@ -96,6 +90,23 @@ public class RegistrationService {
         student.setEnabled(true);
         userRepo.save(student);
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     public List<StudentResponseDTO> getAllActiveStudents() {
         return userRepo.findByRoleAndEnabledTrue(Role.STUDENT).stream()

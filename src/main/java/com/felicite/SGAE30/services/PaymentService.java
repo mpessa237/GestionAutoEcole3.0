@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -66,18 +65,23 @@ import java.util.stream.Collectors;
         return paymentMapper.toDto(savedPayment, newRemaining);
     }
 
+
+
     public List<PaymentResponseDTO> getPaymentHistory(Long registrationId) {
         Registration reg = registrationRepo.findById(registrationId)
-                .orElseThrow(() -> new RuntimeException("registration file not found."));
+                .orElseThrow(() -> new RuntimeException(" file note found"));
 
-        List<Payment> payments = paymentRepo.findByRegistration_RegistrationIdOrderByDatePaymentDesc(registrationId);
+        List<Payment> allPayments = paymentRepo.findByRegistration_RegistrationIdOrderByDatePaymentDesc(registrationId);
 
-        Double totalPaid = paymentRepo.sumAmountByRegistration(registrationId);
-        if (totalPaid == null) totalPaid = 0.0;
-        Double currentRemaining = reg.getTotalPrice() - totalPaid;
+        Double totalValidPaid = allPayments.stream()
+                .filter(p -> p.getPaymentStatus() == PaymentStatus.VALID)
+                .mapToDouble(Payment::getAmount)
+                .sum();
 
-        return payments.stream()
-                .map(payment -> paymentMapper.toDto(payment, currentRemaining))
+        Double trueRemaining = reg.getTotalPrice() - totalValidPaid;
+
+        return allPayments.stream()
+                .map(p -> paymentMapper.toDto(p, trueRemaining))
                 .collect(Collectors.toList());
     }
 
@@ -87,6 +91,18 @@ import java.util.stream.Collectors;
                 .orElseThrow(()-> new RuntimeException("payment not found!!!"));
         payment.setPaymentStatus(PaymentStatus.CANCELLED);
         payment.setNote(payment.getNote() + " (cancel the " + LocalDateTime.now() + ")");
+
+        paymentRepo.save(payment);
+    }
+
+    @Transactional
+    public void activePayment(Long paymentId){
+
+        Payment payment = paymentRepo.findById(paymentId)
+                .orElseThrow(()-> new RuntimeException("payment not found!!"));
+
+        payment.setPaymentStatus(PaymentStatus.VALID);
+        payment.setNote(payment.getNote() + "(active the " + LocalDateTime.now() +")");
 
         paymentRepo.save(payment);
     }
