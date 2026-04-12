@@ -8,7 +8,5 @@ public record RegistrationRequestDTO(
         String password,
 
         Double totalPrice,
-        String typePermit,
-        Long adminId
-) {
+        String typePermit) {
 }

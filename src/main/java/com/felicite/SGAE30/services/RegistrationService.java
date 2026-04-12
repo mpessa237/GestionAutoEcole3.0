@@ -2,6 +2,7 @@ package com.felicite.SGAE30.services;
 
 import com.felicite.SGAE30.dtos.RegistrationRequestDTO;
 import com.felicite.SGAE30.dtos.StudentResponseDTO;
+import com.felicite.SGAE30.dtos.UserRegistrationDTO;
 import com.felicite.SGAE30.enums.Role;
 import com.felicite.SGAE30.enums.TypePermit;
 import com.felicite.SGAE30.models.Registration;
@@ -9,12 +10,16 @@ import com.felicite.SGAE30.models.User;
 import com.felicite.SGAE30.repositories.RegistrationRepo;
 import com.felicite.SGAE30.repositories.UserRepo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,13 +28,38 @@ public class RegistrationService {
 
     private final UserRepo userRepo;
     private final RegistrationRepo registrationRepo;
+    private final PasswordEncoder passwordEncoder;
 
 
     @Transactional
+    public String registerUser(UserRegistrationDTO registrationDTO){
+
+        if (userRepo.findByEmail(registrationDTO.email()).isPresent()){
+            throw new RuntimeException("Error:Email already exists!!");
+        }
+
+        User user = new User();
+        user.setFirstname(registrationDTO.firstname());
+        user.setLastname(registrationDTO.lastname());
+        user.setEmail(registrationDTO.email());
+        user.setPhoneNumber(registrationDTO.phoneNumber());
+        user.setRole(registrationDTO.role());
+
+        user.setPassword(passwordEncoder.encode(registrationDTO.password()));
+
+        userRepo.save(user);
+
+        return "user save" +registrationDTO.role();
+    }
+
+
+    @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
     public Registration registerStudent(RegistrationRequestDTO requestDTO) {
 
-        User admin = userRepo.findById(requestDTO.adminId())
-                .orElseThrow(() -> new RuntimeException("admin not found!!"));
+        if (userRepo.findByEmail(requestDTO.email()).isPresent()){
+            throw new RuntimeException(" email already exist!!");
+        }
 
         User student = new User();
         student.setFirstname(requestDTO.firstname());
@@ -37,23 +67,26 @@ public class RegistrationService {
         student.setEmail(requestDTO.email());
         student.setPhoneNumber(requestDTO.phoneNumber());
         student.setRole(Role.STUDENT);
-        student.setPassword("123456789");
-
+        student.setPassword(passwordEncoder.encode(requestDTO.password()));
         User savedStudent = userRepo.save(student);
 
         Registration registration = new Registration();
         registration.setStudent(savedStudent);
+
+        String adminEmail = Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getName();
+        User admin = userRepo.findByEmail(adminEmail)
+                .orElseThrow(() -> new RuntimeException("Admin non trouvé"));
         registration.setCreatedBy(admin);
 
-        registration.setTypePermit(TypePermit.valueOf(requestDTO.typePermit()));
-
         TypePermit type = TypePermit.valueOf(requestDTO.typePermit());
-        registration.setTotalPrice(type.getDefaultPrice());
+        registration.setTypePermit(type);
 
-        registration.setTotalPrice(requestDTO.totalPrice());
+        Double finalPrice = (requestDTO.totalPrice() != null) ? requestDTO.totalPrice() : type.getDefaultPrice();
+        registration.setTotalPrice(finalPrice);
+
         registration.setRegistrationDate(LocalDateTime.now());
 
-        registration.setFileNumber("AE-" + LocalDate.now().getYear() + "-" + System.currentTimeMillis());
+        registration.setFileNumber("AE-" + LocalDate.now().getYear() + "-" + System.currentTimeMillis() % 100000);
 
         return registrationRepo.save(registration);
     }
@@ -71,6 +104,7 @@ public class RegistrationService {
                 ))
                 .collect(Collectors.toList());
     }
+
     @Transactional
     public void disableStudent(Long userId) {
         User student = userRepo.findById(userId)
@@ -90,23 +124,6 @@ public class RegistrationService {
         student.setEnabled(true);
         userRepo.save(student);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     public List<StudentResponseDTO> getAllActiveStudents() {
         return userRepo.findByRoleAndEnabledTrue(Role.STUDENT).stream()

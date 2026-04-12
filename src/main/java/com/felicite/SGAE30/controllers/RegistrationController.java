@@ -1,14 +1,15 @@
 package com.felicite.SGAE30.controllers;
 
-import com.felicite.SGAE30.dtos.RegistrationRequestDTO;
-import com.felicite.SGAE30.dtos.RegistrationResponseDTO;
-import com.felicite.SGAE30.dtos.StudentResponseDTO;
+import com.felicite.SGAE30.dtos.*;
 import com.felicite.SGAE30.enums.DebtorResponseDTO;
 import com.felicite.SGAE30.mappers.RegistrationMapper;
 import com.felicite.SGAE30.models.Registration;
+import com.felicite.SGAE30.services.LoginService;
 import com.felicite.SGAE30.services.RegistrationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +21,12 @@ public class RegistrationController {
 
     private final RegistrationService registrationService;
     private final RegistrationMapper registrationMapper;
+
+    @PostMapping("/register")
+    public ResponseEntity<String> register(@RequestBody UserRegistrationDTO userRegistrationDTO){
+        String message = registrationService.registerUser(userRegistrationDTO);
+        return ResponseEntity.ok(message);
+    }
 
     @PostMapping("/create")
     public ResponseEntity<RegistrationResponseDTO> create(@RequestBody RegistrationRequestDTO requestDTO){
