@@ -1,6 +1,7 @@
 package com.felicite.SGAE30.services;
 
 import com.felicite.SGAE30.dtos.RegistrationRequestDTO;
+import com.felicite.SGAE30.dtos.RegistrationResponseDTO;
 import com.felicite.SGAE30.models.Registration;
 import com.felicite.SGAE30.models.User;
 import com.felicite.SGAE30.repositories.RegistrationRepo;
@@ -46,7 +47,7 @@ class RegistrationServiceTest {
 
         //act
 
-        Registration result = registrationService.registerStudent(requestDTO);
+        RegistrationResponseDTO result = registrationService.registerStudent(requestDTO);
 
         //assert
         assertNotNull(result);

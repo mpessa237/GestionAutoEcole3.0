@@ -6,7 +6,6 @@ public record PaymentRequestDTO(
         Double amount,
         PaymentMethod paymentMethod,
         Long registrationId,
-        Long adminId,
         String note
 ) {
 }

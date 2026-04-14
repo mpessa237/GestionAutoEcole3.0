@@ -11,6 +11,8 @@ import com.felicite.SGAE30.repositories.PaymentRepo;
 import com.felicite.SGAE30.repositories.RegistrationRepo;
 import com.felicite.SGAE30.repositories.UserRepo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,23 +32,23 @@ import java.util.stream.Collectors;
         private final PaymentMapper paymentMapper;
 
     @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
     public PaymentResponseDTO executePayment(PaymentRequestDTO paymentRequestDTO) {
 
         Registration reg = registrationRepo.findById(paymentRequestDTO.registrationId())
-                .orElseThrow(() -> new RuntimeException("Registration not found ID : " + paymentRequestDTO.registrationId()));
+                .orElseThrow(() -> new RuntimeException("registration not found with ID : " + paymentRequestDTO.registrationId()));
 
         Double currentTotalPaid = paymentRepo.sumAmountByRegistration(reg.getRegistrationId());
         if (currentTotalPaid == null) currentTotalPaid = 0.0;
-
         Double remainingBefore = reg.getTotalPrice() - currentTotalPaid;
 
         if (paymentRequestDTO.amount() > remainingBefore) {
-            throw new RuntimeException("Transaction declined: The amount (" + paymentRequestDTO.amount() +
-                    "FCFA) is greater than the remaining amount to be paid (" + remainingBefore + " FCFA)");
+            throw new RuntimeException("Transaction cancelled : The amount exceeds the remaining balance due (" + remainingBefore + " CFA)");
         }
 
-        User admin = userRepo.findById(paymentRequestDTO.adminId())
-                .orElseThrow(() -> new RuntimeException("Admin not found"));
+        String currentAdminEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User admin = userRepo.findByEmail(currentAdminEmail)
+                .orElseThrow(() -> new RuntimeException("Admin connected not found en base "));
 
         Payment payment = new Payment();
         payment.setAmount(paymentRequestDTO.amount());
@@ -56,7 +58,7 @@ import java.util.stream.Collectors;
         payment.setNote(paymentRequestDTO.note());
         payment.setDatePayment(LocalDateTime.now());
 
-        payment.setReceiptNumber("REC-" + LocalDate.now().getYear() + "-" + System.currentTimeMillis());
+        payment.setReceiptNumber("REC-" + LocalDate.now().getYear() + "-" + (System.currentTimeMillis() % 1000000));
 
         Payment savedPayment = paymentRepo.save(payment);
 

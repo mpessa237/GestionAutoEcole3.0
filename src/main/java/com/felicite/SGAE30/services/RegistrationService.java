@@ -1,6 +1,7 @@
 package com.felicite.SGAE30.services;
 
 import com.felicite.SGAE30.dtos.RegistrationRequestDTO;
+import com.felicite.SGAE30.dtos.RegistrationResponseDTO;
 import com.felicite.SGAE30.dtos.StudentResponseDTO;
 import com.felicite.SGAE30.dtos.UserRegistrationDTO;
 import com.felicite.SGAE30.enums.Role;
@@ -19,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -55,7 +55,7 @@ public class RegistrationService {
 
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
-    public Registration registerStudent(RegistrationRequestDTO requestDTO) {
+    public RegistrationResponseDTO registerStudent(RegistrationRequestDTO requestDTO) {
 
         if (userRepo.findByEmail(requestDTO.email()).isPresent()){
             throw new RuntimeException(" email already exist!!");
@@ -68,27 +68,34 @@ public class RegistrationService {
         student.setPhoneNumber(requestDTO.phoneNumber());
         student.setRole(Role.STUDENT);
         student.setPassword(passwordEncoder.encode(requestDTO.password()));
+
         User savedStudent = userRepo.save(student);
 
         Registration registration = new Registration();
         registration.setStudent(savedStudent);
 
-        String adminEmail = Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getName();
-        User admin = userRepo.findByEmail(adminEmail)
-                .orElseThrow(() -> new RuntimeException("Admin non trouvé"));
+        String adminEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User admin = userRepo.findByEmail(adminEmail).orElseThrow();
         registration.setCreatedBy(admin);
 
         TypePermit type = TypePermit.valueOf(requestDTO.typePermit());
         registration.setTypePermit(type);
-
-        Double finalPrice = (requestDTO.totalPrice() != null) ? requestDTO.totalPrice() : type.getDefaultPrice();
-        registration.setTotalPrice(finalPrice);
-
+        registration.setTotalPrice(requestDTO.totalPrice());
         registration.setRegistrationDate(LocalDateTime.now());
-
         registration.setFileNumber("AE-" + LocalDate.now().getYear() + "-" + System.currentTimeMillis() % 100000);
 
-        return registrationRepo.save(registration);
+        Registration savedReg = registrationRepo.save(registration);
+
+        return new RegistrationResponseDTO(
+                savedReg.getRegistrationId(),
+                savedReg.getFileNumber(),
+                savedReg.getRegistrationDate().toString(),
+                savedReg.getTypePermit(),
+                savedReg.getTotalPrice(),
+                savedStudent.getFirstname(),
+                savedStudent.getLastname(),
+                admin.getFirstname()
+        );
     }
 
 

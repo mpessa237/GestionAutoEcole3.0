@@ -30,10 +30,8 @@ public class RegistrationController {
 
     @PostMapping("/create")
     public ResponseEntity<RegistrationResponseDTO> create(@RequestBody RegistrationRequestDTO requestDTO){
-        Registration registration = registrationService.registerStudent(requestDTO);
-        RegistrationResponseDTO registrationResponseDTO = registrationMapper.toDto(registration);
-
-        return ResponseEntity.ok(registrationResponseDTO);
+        RegistrationResponseDTO registration = registrationService.registerStudent(requestDTO);
+        return ResponseEntity.ok(registration);
     }
 
     @GetMapping("/all")

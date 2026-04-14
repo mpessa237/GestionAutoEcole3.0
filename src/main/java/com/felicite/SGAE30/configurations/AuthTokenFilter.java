@@ -40,14 +40,13 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             return;
         }
 
-        jwt = authHeader.substring(7);
+        jwt = authHeader.substring(7).trim();
 
         try {
             userEmail = jwtUtils.extractUsername(jwt);
 
             if (revokedTokenRepo.findByToken(jwt).isPresent()){
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.setContentType("application/json");
                 response.getWriter().write("{\"error\": \"token has been revoked\"}");
                 return;
             }
@@ -61,9 +60,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                             null,
                             userDetails.getAuthorities()
                     );
-                    authenticationToken.setDetails(
-                            new WebAuthenticationDetailsSource().buildDetails(request)
-                    );
+                    authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                 }
             }
@@ -71,13 +68,13 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
         } catch (ExpiredJwtException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("application/json");
             response.getWriter().write("{\"error\": \"JWT Expired\"}");
-
         } catch (Exception e) {
+            System.err.println("❌ Erreur interne du filtre : " + e.getMessage());
+
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.setContentType("application/json");
-            response.getWriter().write("{\"error\": \"Invalid JWT token\"}");
+            response.getWriter().write("{\"error\": \"Invalid JWT token or Internal error\"}");
         }
     }
 }

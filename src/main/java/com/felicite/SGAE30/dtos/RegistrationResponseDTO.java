@@ -1,13 +1,16 @@
 package com.felicite.SGAE30.dtos;
 
+import com.felicite.SGAE30.enums.TypePermit;
+
 public record RegistrationResponseDTO(
-        Long id,
+        Long registrationId,
         String fileNumber,
         String dateInscription,
-        com.felicite.SGAE30.enums.TypePermit typePermit,
+        TypePermit typePermit,
         Double totalPrice,
         String firstnameStudent,
         String lastnameStudent,
         String firstnameAdmin
 ) {
+
 }
