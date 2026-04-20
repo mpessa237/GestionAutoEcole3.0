@@ -13,7 +13,6 @@ public class VehicleMapper {
         vehicle.setRegistration(vehicleRequestDTO.registration());
         vehicle.setModel(vehicleRequestDTO.model());
         vehicle.setMark(vehicleRequestDTO.mark());
-        vehicle.setStatusVehicle(vehicleRequestDTO.statusVehicle());
         vehicle.setTypePermit(vehicleRequestDTO.typePermit());
         return vehicle;
     }
@@ -24,7 +23,6 @@ public class VehicleMapper {
                 vehicle.getRegistration(),
                 vehicle.getModel(),
                 vehicle.getMark(),
-                vehicle.getStatusVehicle(),
                 vehicle.getTypePermit()
         );
     }

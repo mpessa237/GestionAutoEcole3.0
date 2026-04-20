@@ -69,9 +69,12 @@ import java.util.stream.Collectors;
 
 
 
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasRole('ADMIN') or @securityService.isOwnerOfRegistration(#registrationId)")
     public List<PaymentResponseDTO> getPaymentHistory(Long registrationId) {
+
         Registration reg = registrationRepo.findById(registrationId)
-                .orElseThrow(() -> new RuntimeException(" file note found"));
+                .orElseThrow(() -> new RuntimeException("file not found"));
 
         List<Payment> allPayments = paymentRepo.findByRegistration_RegistrationIdOrderByDatePaymentDesc(registrationId);
 
@@ -80,31 +83,45 @@ import java.util.stream.Collectors;
                 .mapToDouble(Payment::getAmount)
                 .sum();
 
-        Double trueRemaining = reg.getTotalPrice() - totalValidPaid;
+        Double currentRemaining = reg.getTotalPrice() - totalValidPaid;
 
         return allPayments.stream()
-                .map(p -> paymentMapper.toDto(p, trueRemaining))
+                .map(p -> paymentMapper.toDto(p, currentRemaining))
                 .collect(Collectors.toList());
     }
 
     @Transactional
-    public void cancelPayment(Long paymentId){
+    @PreAuthorize("hasRole('ADMIN')")
+    public void cancelPayment(Long paymentId) {
         Payment payment = paymentRepo.findById(paymentId)
-                .orElseThrow(()-> new RuntimeException("payment not found!!!"));
+                .orElseThrow(() -> new RuntimeException("payment not found with ID : " + paymentId));
+
+        String adminEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User admin = userRepo.findByEmail(adminEmail).orElseThrow();
+
         payment.setPaymentStatus(PaymentStatus.CANCELLED);
-        payment.setNote(payment.getNote() + " (cancel the " + LocalDateTime.now() + ")");
+
+        String auditNote = String.format("\n[ANNULÉ le %s par %s]",
+                LocalDateTime.now(), admin.getFirstname());
+        payment.setNote(payment.getNote() + auditNote);
 
         paymentRepo.save(payment);
     }
 
     @Transactional
-    public void activePayment(Long paymentId){
-
+    @PreAuthorize("hasRole('ADMIN')")
+    public void activePayment(Long paymentId) {
         Payment payment = paymentRepo.findById(paymentId)
-                .orElseThrow(()-> new RuntimeException("payment not found!!"));
+                .orElseThrow(() -> new RuntimeException("payment not found with ID : " + paymentId));
+
+        String adminEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User admin = userRepo.findByEmail(adminEmail).orElseThrow();
 
         payment.setPaymentStatus(PaymentStatus.VALID);
-        payment.setNote(payment.getNote() + "(active the " + LocalDateTime.now() +")");
+
+        String auditNote = String.format("\n[ACTIVÉ le %s par %s]",
+                LocalDateTime.now(), admin.getFirstname());
+        payment.setNote(payment.getNote() + auditNote);
 
         paymentRepo.save(payment);
     }

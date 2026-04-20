@@ -7,7 +7,6 @@ public record VehicleRequestDTO(
         String registration,
         String model,
         String mark,
-        StatusVehicle statusVehicle,
         TypePermit typePermit
 ) {
 }

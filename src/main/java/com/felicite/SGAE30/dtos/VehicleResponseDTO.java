@@ -8,7 +8,6 @@ public record VehicleResponseDTO(
         String registration,
         String model,
         String mark,
-        StatusVehicle statusVehicle,
         TypePermit typePermit
 ) {
 }
