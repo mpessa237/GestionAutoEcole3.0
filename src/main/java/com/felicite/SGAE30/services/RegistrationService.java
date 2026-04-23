@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -107,7 +108,8 @@ public class RegistrationService {
                         user.getLastname(),
                         user.getPhoneNumber(),
                         user.getFileRegistration() != null ? user.getFileRegistration().getFileNumber() : "N/A",
-                        user.getEmail()
+                        user.getEmail(),
+                        user.isEnabled()
                 ))
                 .collect(Collectors.toList());
     }
@@ -132,6 +134,27 @@ public class RegistrationService {
         userRepo.save(student);
     }
 
+    @Transactional
+    public StudentResponseDTO patchStudent(Long userId, Map<String, Object> updates) {
+        User student = userRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        updates.forEach((key, value) -> {
+            switch (key) {
+                case "firstname" -> student.setFirstname((String) value);
+                case "lastname" -> student.setLastname((String) value);
+                case "email" -> student.setEmail((String) value);
+                case "phoneNumber" -> student.setPhoneNumber((String) value);
+            }
+        });
+
+        User updated = userRepo.save(student);
+        return new StudentResponseDTO(
+                updated.getUserId(), updated.getFirstname(), updated.getLastname(),
+                updated.getPhoneNumber(), "N/A", updated.getEmail(), updated.isEnabled()
+        );
+    }
+
     public List<StudentResponseDTO> getAllActiveStudents() {
         return userRepo.findByRoleAndEnabledTrue(Role.STUDENT).stream()
                 .map(user -> new StudentResponseDTO(
@@ -140,7 +163,8 @@ public class RegistrationService {
                         user.getLastname(),
                         user.getPhoneNumber(),
                         user.getFileRegistration() != null ? user.getFileRegistration().getFileNumber() : "N/A",
-                        user.getEmail()
+                        user.getEmail(),
+                        user.isEnabled()
                 ))
                 .collect(Collectors.toList());
     }
@@ -153,7 +177,8 @@ public class RegistrationService {
                         user.getLastname(),
                         user.getPhoneNumber(),
                         user.getFileRegistration() != null ? user.getFileRegistration().getFileNumber() : "N/A",
-                        user.getEmail()
+                        user.getEmail(),
+                        user.isEnabled()
                 ))
                 .collect(Collectors.toList());
    }

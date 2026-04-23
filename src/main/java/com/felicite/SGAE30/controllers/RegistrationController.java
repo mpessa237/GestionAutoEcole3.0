@@ -13,14 +13,15 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin/registrations")
+@CrossOrigin(origins = "http://localhost:4200")
 @RequiredArgsConstructor
 public class RegistrationController {
 
     private final RegistrationService registrationService;
-    private final RegistrationMapper registrationMapper;
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody UserRegistrationDTO userRegistrationDTO){
@@ -59,6 +60,11 @@ public class RegistrationController {
     public ResponseEntity<String> enableStudent(@PathVariable Long userId) {
         registrationService.enableStudent(userId);
         return ResponseEntity.ok("the account student reactive successfully.");
+    }
+
+    @PatchMapping("/{userId}/update")
+    public ResponseEntity<StudentResponseDTO> patchUpdate(@PathVariable Long userId, @RequestBody Map<String, Object> updates) {
+        return ResponseEntity.ok(registrationService.patchStudent(userId, updates));
     }
 
 

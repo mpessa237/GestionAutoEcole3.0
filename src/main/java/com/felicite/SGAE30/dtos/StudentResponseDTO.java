@@ -14,6 +14,7 @@ public class StudentResponseDTO{
     private String phoneNumber;
     private String fileNumber;
     private String email;
+    boolean enabled;
 
 
 }
