@@ -15,6 +15,9 @@ public class StudentResponseDTO{
     private String fileNumber;
     private String email;
     boolean enabled;
+    Long registrationId;
 
 
+    public StudentResponseDTO(Long userId, String firstname, String lastname, String phoneNumber, String s, String email, boolean enabled) {
+    }
 }

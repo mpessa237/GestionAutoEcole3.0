@@ -32,8 +32,10 @@ import java.util.stream.Collectors;
         private final PaymentMapper paymentMapper;
 
     @Transactional
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public PaymentResponseDTO executePayment(PaymentRequestDTO paymentRequestDTO) {
+        System.out.println("Utilisateur connecté : " + SecurityContextHolder.getContext().getAuthentication().getName());
+        System.out.println("Autorités : " + SecurityContextHolder.getContext().getAuthentication().getAuthorities());
 
         Registration reg = registrationRepo.findById(paymentRequestDTO.registrationId())
                 .orElseThrow(() -> new RuntimeException("registration not found with ID : " + paymentRequestDTO.registrationId()));

@@ -24,23 +24,20 @@ public class SecurityConfig {
 
 
     @Bean
-    public DefaultSecurityFilterChain securityFilterChain(HttpSecurity httpSecurity)throws Exception{
-
+    public DefaultSecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-                 .csrf(AbstractHttpConfigurer::disable)
-                 .cors(Customizer.withDefaults())
-                 .authorizeHttpRequests(auth->auth
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(Customizer.withDefaults()) // Utilise ta WebConfig
+                .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                                 .requestMatchers("/api/payments").hasRole("ADMIN")
+                        .requestMatchers("/api/payments/**").hasAuthority("ADMIN")
                         .anyRequest().authenticated()
-                         ).sessionManagement(session->session.sessionCreationPolicy(
-                                 SessionCreationPolicy.STATELESS
+                )
+                .sessionManagement(session -> session.sessionCreationPolicy(
+                        SessionCreationPolicy.STATELESS
                 ))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class)
-
-        .build();
-
+                .build();
     }
 }

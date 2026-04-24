@@ -12,7 +12,6 @@ public record PaymentResponseDTO(
         String fileNumber,
 
         String adminName,
-
         Double remainingBalance
 ) {
 }

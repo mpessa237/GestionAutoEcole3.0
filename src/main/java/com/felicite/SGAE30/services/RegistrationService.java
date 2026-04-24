@@ -102,15 +102,19 @@ public class RegistrationService {
 
     public List<StudentResponseDTO> getAllStudents() {
         return userRepo.findByRole(Role.STUDENT).stream()
-                .map(user -> new StudentResponseDTO(
-                        user.getUserId(),
-                        user.getFirstname(),
-                        user.getLastname(),
-                        user.getPhoneNumber(),
-                        user.getFileRegistration() != null ? user.getFileRegistration().getFileNumber() : "N/A",
-                        user.getEmail(),
-                        user.isEnabled()
-                ))
+                .map(user -> {
+                    assert user.getFileRegistration() != null;
+                    return new StudentResponseDTO(
+                            user.getUserId(),
+                            user.getFirstname(),
+                            user.getLastname(),
+                            user.getPhoneNumber(),
+                            user.getFileRegistration().getFileNumber(),
+                            user.getEmail(),
+                            user.isEnabled(),
+                            user.getFileRegistration().getRegistrationId()
+                    );
+                })
                 .collect(Collectors.toList());
     }
 
