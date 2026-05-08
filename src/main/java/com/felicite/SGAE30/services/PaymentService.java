@@ -72,7 +72,7 @@ import java.util.stream.Collectors;
 
 
     @Transactional(readOnly = true)
-    @PreAuthorize("hasRole('ADMIN') or @securityService.isOwnerOfRegistration(#registrationId)")
+    @PreAuthorize("hasAuthority('ADMIN') or @securityService.isOwnerOfRegistration(#registrationId)")
     public List<PaymentResponseDTO> getPaymentHistory(Long registrationId) {
 
         Registration reg = registrationRepo.findById(registrationId)

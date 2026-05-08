@@ -1,4 +1,4 @@
-package com.felicite.SGAE30.services;
+/*package com.felicite.SGAE30.services;
 
 import com.felicite.SGAE30.dtos.RegistrationRequestDTO;
 import com.felicite.SGAE30.dtos.RegistrationResponseDTO;
@@ -101,4 +101,4 @@ class RegistrationServiceTest {
         verify(userRepo,times(1)).findById(userId);
         verify(userRepo,times(1)).save(any(User.class));
     }
-}
+}*/

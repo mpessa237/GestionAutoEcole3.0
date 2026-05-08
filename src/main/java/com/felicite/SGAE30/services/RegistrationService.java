@@ -153,9 +153,19 @@ public class RegistrationService {
         });
 
         User updated = userRepo.save(student);
+
+        String fileNum = updated.getFileRegistration() != null ? updated.getFileRegistration().getFileNumber() : "N/A";
+        Long registrationId = updated.getFileRegistration() != null ? updated.getFileRegistration().getRegistrationId() : null;
+
         return new StudentResponseDTO(
-                updated.getUserId(), updated.getFirstname(), updated.getLastname(),
-                updated.getPhoneNumber(), "N/A", updated.getEmail(), updated.isEnabled()
+                updated.getUserId(),
+                updated.getFirstname(),
+                updated.getLastname(),
+                updated.getPhoneNumber(),
+                fileNum,
+                updated.getEmail(),
+                updated.isEnabled(),
+                registrationId
         );
     }
 
@@ -168,7 +178,8 @@ public class RegistrationService {
                         user.getPhoneNumber(),
                         user.getFileRegistration() != null ? user.getFileRegistration().getFileNumber() : "N/A",
                         user.getEmail(),
-                        user.isEnabled()
+                        user.isEnabled(),
+                        user.getFileRegistration() != null ? user.getFileRegistration().getRegistrationId() : null
                 ))
                 .collect(Collectors.toList());
     }
@@ -182,7 +193,8 @@ public class RegistrationService {
                         user.getPhoneNumber(),
                         user.getFileRegistration() != null ? user.getFileRegistration().getFileNumber() : "N/A",
                         user.getEmail(),
-                        user.isEnabled()
+                        user.isEnabled(),
+                        user.getFileRegistration() != null ? user.getFileRegistration().getRegistrationId() : null
                 ))
                 .collect(Collectors.toList());
    }

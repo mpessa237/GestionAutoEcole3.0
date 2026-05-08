@@ -70,11 +70,11 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write("{\"error\": \"JWT Expired\"}");
         } catch (Exception e) {
-            System.err.println("❌ Erreur interne du filtre : " + e.getMessage());
+            e.printStackTrace();
 
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.setContentType("application/json");
-            response.getWriter().write("{\"error\": \"Invalid JWT token or Internal error\"}");
+            response.getWriter().write("{\"error\": \"" + e.getMessage() + "\"}");
         }
     }
 }

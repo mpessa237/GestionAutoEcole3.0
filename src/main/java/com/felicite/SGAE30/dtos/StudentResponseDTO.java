@@ -1,12 +1,11 @@
 package com.felicite.SGAE30.dtos;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@AllArgsConstructor
 @NoArgsConstructor
 @Data
+@Getter
+@Setter
 public class StudentResponseDTO{
     private Long userId;
     private String firstname;
@@ -17,7 +16,17 @@ public class StudentResponseDTO{
     boolean enabled;
     Long registrationId;
 
-
-    public StudentResponseDTO(Long userId, String firstname, String lastname, String phoneNumber, String s, String email, boolean enabled) {
+    public StudentResponseDTO(Long userId, String firstname, String lastname, String phoneNumber,
+                              String fileNumber, String email, boolean enabled, Long registrationId) {
+        this.userId = userId;
+        this.firstname = firstname;
+        this.lastname = lastname;
+        this.phoneNumber = phoneNumber;
+        this.fileNumber = fileNumber;
+        this.email = email;
+        this.enabled = enabled;
+        this.registrationId = registrationId;
     }
+
+
 }

@@ -12,14 +12,18 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/payments")
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 public class PaymentController {
     private final PaymentService paymentService;
 
     @PostMapping("/execute")
-    public ResponseEntity<PaymentResponseDTO> execute(@RequestBody PaymentRequestDTO paymentRequestDTO) {
-        PaymentResponseDTO paymentResponseDTO = paymentService.executePayment(paymentRequestDTO);
-        return ResponseEntity.ok(paymentResponseDTO);
+    public ResponseEntity<?> executePayment(@RequestBody PaymentRequestDTO paymentRequestDTO) {
+        try {
+            return ResponseEntity.ok(paymentService.executePayment(paymentRequestDTO));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(e.getMessage());
+        }
     }
 
     @GetMapping("/history/{registrationId}")
