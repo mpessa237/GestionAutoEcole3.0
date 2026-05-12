@@ -14,4 +14,5 @@ public record PaymentResponseDTO(
         String adminName,
         Double remainingBalance
 ) {
+
 }

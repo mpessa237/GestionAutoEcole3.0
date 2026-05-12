@@ -2,6 +2,7 @@ package com.felicite.SGAE30.services;
 
 import com.felicite.SGAE30.dtos.PaymentRequestDTO;
 import com.felicite.SGAE30.dtos.PaymentResponseDTO;
+import com.felicite.SGAE30.enums.PaymentMethod;
 import com.felicite.SGAE30.enums.PaymentStatus;
 import com.felicite.SGAE30.mappers.PaymentMapper;
 import com.felicite.SGAE30.models.Payment;
@@ -54,7 +55,7 @@ import java.util.stream.Collectors;
 
         Payment payment = new Payment();
         payment.setAmount(paymentRequestDTO.amount());
-        payment.setPaymentMethod(paymentRequestDTO.paymentMethod());
+        payment.setPaymentMethod(PaymentMethod.valueOf(paymentRequestDTO.paymentMethod()));
         payment.setRegistration(reg);
         payment.setCreatedBy(admin);
         payment.setNote(paymentRequestDTO.note());
