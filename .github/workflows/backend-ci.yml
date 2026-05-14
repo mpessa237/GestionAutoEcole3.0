@@ -7,13 +7,8 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build-backend:
+  build-and-test:
     runs-on: ubuntu-latest
-
-    # Si ton backend est dans un dossier spécifique (ex: /backend), décommente la ligne suivante :
-    # defaults:
-    #   run:
-    #     working-directory: ./backend
 
     steps:
       - name: Checkout du code
@@ -26,12 +21,13 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Compilation et Packaging (SANS TESTS)
-        # On utilise -DskipTests pour ignorer les tests comme tu l'as demandé
-        run: mvn clean package -DskipTests
+      - name: Compilation et Exécution des Tests
+        run: mvn clean verify
 
       - name: Upload du JAR (Artefact)
+        # Cette étape ne s'exécutera QUE si les tests passent
+        if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: sgae-api
+          name: sgae-api-validated
           path: target/*.jar

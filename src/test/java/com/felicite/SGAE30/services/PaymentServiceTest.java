@@ -14,8 +14,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.actuate.endpoint.SecurityContext;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
@@ -43,7 +43,7 @@ class PaymentServiceTest {
     @Test
     void executePayment_ShouldSuccess_WhenAmountIsValide() {
         Long registrationId = 1L;
-        PaymentRequestDTO request = new PaymentRequestDTO(50000.0, "CASH", 1L, "Avance");
+        PaymentRequestDTO request = new PaymentRequestDTO(50000.0, "CASH", registrationId, "Avance");
 
         Registration reg = new Registration();
         reg.setRegistrationId(registrationId);
@@ -54,35 +54,31 @@ class PaymentServiceTest {
 
         Authentication auth = mock(Authentication.class);
         when(auth.getName()).thenReturn("hervempessa7@gmail.com");
+
         SecurityContext securityContext = mock(SecurityContext.class);
-        when(securityContext.getPrincipal()).thenReturn(auth);
-        SecurityContextHolder.setContext((org.springframework.security.core.context.SecurityContext) securityContext);
+        when(securityContext.getAuthentication()).thenReturn(auth); // Mock direct
+
+        SecurityContextHolder.setContext(securityContext);
 
         when(registrationRepo.findById(registrationId)).thenReturn(Optional.of(reg));
         when(paymentRepo.sumAmountByRegistration(registrationId)).thenReturn(50000.0);
         when(userRepo.findByEmail("hervempessa7@gmail.com")).thenReturn(Optional.of(admin));
 
         when(paymentRepo.save(any(Payment.class))).thenAnswer(i -> i.getArguments()[0]);
+
         when(paymentMapper.toDto(any(Payment.class), anyDouble()))
                 .thenReturn(new PaymentResponseDTO(
-                        1L,                     // paymentId
-                        "REC-2026-123456",      // receiptNumber
-                        50000.0,                // amount
-                        LocalDateTime.now().toString(), // datePayment (converti en String)
-                        "CASH",                 // paymentMethod
-                        "Avance",               // note
-                        "Jean Dupont",          // studentFullName (exemple)
-                        "FILE-2026-001",        // fileNumber (exemple)
-                        "Admin User",           // adminName (exemple)
-                        50000.0                 // remainingBalance
+                        1L, "REC-2026-123456", 50000.0,
+                        LocalDateTime.now().toString(), "CASH", "Avance",
+                        "Herve Mpessa", "FILE-001", "Admin", 50000.0
                 ));
+
         PaymentResponseDTO result = paymentService.executePayment(request);
 
         assertNotNull(result);
+        assertEquals(50000.0, result.remainingBalance());
         verify(paymentRepo, times(1)).save(any(Payment.class));
-        verify(registrationRepo).findById(registrationId);
     }
-
 
 
 }
