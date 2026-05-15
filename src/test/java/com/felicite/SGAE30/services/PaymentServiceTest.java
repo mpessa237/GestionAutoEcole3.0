@@ -19,6 +19,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -56,8 +57,7 @@ class PaymentServiceTest {
         when(auth.getName()).thenReturn("hervempessa7@gmail.com");
 
         SecurityContext securityContext = mock(SecurityContext.class);
-        when(securityContext.getAuthentication()).thenReturn(auth); // Mock direct
-
+        when(securityContext.getAuthentication()).thenReturn(auth);
         SecurityContextHolder.setContext(securityContext);
 
         when(registrationRepo.findById(registrationId)).thenReturn(Optional.of(reg));
