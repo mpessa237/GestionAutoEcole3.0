@@ -22,7 +22,7 @@ jobs:
           cache: maven
 
       - name: Compilation et Exécution des Tests
-        run: mvn clean verify
+        run: mvn clean verify -e
 
       - name: Upload du JAR (Artefact)
         # Cette étape ne s'exécutera QUE si les tests passent
