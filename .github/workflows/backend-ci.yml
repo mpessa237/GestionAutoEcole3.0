@@ -19,15 +19,34 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: maven
+          cache: 'maven'  # Cache Maven intégré
 
-      - name: Compilation et Exécution des Tests
-        run: mvn clean verify -X
+      # Étape dédiée pour le cache Maven (optionnel mais recommandé)
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
 
+      # Compilation seule (pour vérifier les erreurs de compilation)
+      - name: Compilation du projet
+        run: mvn clean compile
+
+      # Exécution des tests (isolée pour déboguer les échecs)
+      - name: Exécution des tests
+        run: mvn test
+
+      # Vérification complète (inclut les tests et le packaging)
+      - name: Vérification complète (build + tests)
+        run: mvn clean verify
+
+      # Upload de l'artefact (uniquement si tout réussit)
       - name: Upload du JAR (Artefact)
-        # Cette étape ne s'exécutera QUE si les tests passent
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: sgae-api-validated
-          path: target/*.jar
+          path: target/*.jar  # ou target/${{ github.event.repository.name }}-*.jar
+          retention-days: 7  # Conserve l'artefact pendant 7 jours
