@@ -202,23 +202,34 @@ public class RegistrationService {
                 .orElseThrow(() -> new RuntimeException("Student not found"));
 
         List<PaymentResponseDTO> paymentList = java.util.Collections.emptyList();
+        double remainingBalance; // Initialisation du reste à payer
 
         if (student.getFileRegistration() != null) {
-            paymentList = student.getFileRegistration().getPayments().stream()
+            var registration = student.getFileRegistration();
+
+            double totalPaid = registration.getPayments().stream()
+                    .mapToDouble(p -> p.getAmount())
+                    .sum();
+
+            double totalContract = registration.getTotalPrice() != null ? registration.getTotalPrice() : 0.0;
+            remainingBalance = totalContract - totalPaid;
+
+            paymentList = registration.getPayments().stream()
                     .map(p -> new PaymentResponseDTO(
                             p.getPaymentId(),
                             p.getReceiptNumber(),
                             p.getAmount(),
-                            p.getDatePayment().toString(),
-                            p.getPaymentMethod().toString(),
+                            p.getDatePayment() != null ? p.getDatePayment().toString() : "",
+                            p.getPaymentMethod() != null ? p.getPaymentMethod().toString(): "",
                             p.getNote(),
                             student.getFirstname() + " " + student.getLastname(),
-                            student.getFileRegistration().getFileNumber(),
-                            p.getCreatedBy() != null ? p.getCreatedBy().getFirstname() : "Système",
-                            0.0
-                           // student.getFileRegistration().getBalance() // Ton calcul du reste à payer
+                            registration.getFileNumber(),
+                            "Admin",
+                            remainingBalance
                     ))
                     .toList();
+        } else {
+            remainingBalance = 0.0;
         }
 
         return new StudentDetailsResponseDTO(
