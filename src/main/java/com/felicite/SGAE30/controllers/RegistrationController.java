@@ -67,5 +67,10 @@ public class RegistrationController {
         return ResponseEntity.ok(registrationService.patchStudent(userId, updates));
     }
 
+    @GetMapping("/{students}/{userId}/{details}")
+    public ResponseEntity<StudentDetailsResponseDTO> getStudentDetails(@PathVariable Long userId){
+        return ResponseEntity.ok(registrationService.getStudentCompleteDetails(userId));
+    }
+
 
 }

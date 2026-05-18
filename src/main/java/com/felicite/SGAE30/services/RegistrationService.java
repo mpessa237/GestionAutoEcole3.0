@@ -1,9 +1,6 @@
 package com.felicite.SGAE30.services;
 
-import com.felicite.SGAE30.dtos.RegistrationRequestDTO;
-import com.felicite.SGAE30.dtos.RegistrationResponseDTO;
-import com.felicite.SGAE30.dtos.StudentResponseDTO;
-import com.felicite.SGAE30.dtos.UserRegistrationDTO;
+import com.felicite.SGAE30.dtos.*;
 import com.felicite.SGAE30.enums.Role;
 import com.felicite.SGAE30.enums.TypePermit;
 import com.felicite.SGAE30.models.Registration;
@@ -55,7 +52,7 @@ public class RegistrationService {
 
 
     @Transactional
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public RegistrationResponseDTO registerStudent(RegistrationRequestDTO requestDTO) {
 
         if (userRepo.findByEmail(requestDTO.email()).isPresent()){
@@ -198,6 +195,43 @@ public class RegistrationService {
                 ))
                 .collect(Collectors.toList());
    }
+
+    @Transactional(readOnly = true)
+    public StudentDetailsResponseDTO getStudentCompleteDetails(Long userId) {
+        User student = userRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        List<PaymentResponseDTO> paymentList = java.util.Collections.emptyList();
+
+        if (student.getFileRegistration() != null) {
+            paymentList = student.getFileRegistration().getPayments().stream()
+                    .map(p -> new PaymentResponseDTO(
+                            p.getPaymentId(),
+                            p.getReceiptNumber(),
+                            p.getAmount(),
+                            p.getDatePayment().toString(),
+                            p.getPaymentMethod().toString(),
+                            p.getNote(),
+                            student.getFirstname() + " " + student.getLastname(),
+                            student.getFileRegistration().getFileNumber(),
+                            p.getCreatedBy() != null ? p.getCreatedBy().getFirstname() : "Système",
+                            0.0
+                           // student.getFileRegistration().getBalance() // Ton calcul du reste à payer
+                    ))
+                    .toList();
+        }
+
+        return new StudentDetailsResponseDTO(
+                student.getUserId(),
+                student.getFirstname(),
+                student.getLastname(),
+                student.getPhoneNumber(),
+                student.getEmail(),
+                student.getFileRegistration() != null ? student.getFileRegistration().getFileNumber() : "N/A",
+                student.getFileRegistration() != null ? student.getFileRegistration().getRegistrationId() : null,
+                paymentList
+        );
+    }
 
 
 }
